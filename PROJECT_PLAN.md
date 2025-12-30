@@ -250,12 +250,51 @@ Il formato JSON è identico a Django e Spring per garantire dashboard uniformi.
 
 ## 🚀 Roadmap v0.2.0+
 
-- [ ] File output con rotation (Winston/Pino integration)
-- [ ] Real Tor exit node detection (external API)
-- [ ] GeoIP blocking
-- [ ] Redis store for rate limiting (distributed)
+### 📁 File Output with Rotation
+- [ ] Implement proper file output in `outputLog()` function
+- [ ] Integrate with [Pino](https://github.com/pinojs/pino) or [Winston](https://github.com/winstonjs/winston)
+- [ ] Add log rotation configuration (size-based, time-based)
+- [ ] Support multiple simultaneous outputs
+
+**Implementation approach:**
+```typescript
+import { appendFile } from 'fs/promises';
+// Or integrate pino-pretty for development, pino for production
+```
+
+---
+
+### 🧅 Real Tor Exit Node Detection
+- [ ] Fetch real Tor exit node list from TorProject API
+- [ ] Cache list with periodic refresh (every 6 hours)
+- [ ] Optional: Integrate with AbuseIPDB or IPQualityScore API
+
+**Implementation approach:**
+```typescript
+const TOR_EXIT_LIST_URL = 'https://check.torproject.org/torbulkexitlist';
+// Fetch on startup, refresh periodically
+```
+
+---
+
+### 🌍 GeoIP Blocking
+- [ ] Integrate MaxMind GeoLite2 database
+- [ ] Add `blockedCountries` config option
+- [ ] Support allow-list mode (only allow specific countries)
+
+**Implementation approach:**
+```bash
+npm install maxmind
+# Download GeoLite2-City.mmdb from MaxMind
+```
+
+---
+
+### 🔄 Other Improvements
+- [ ] Redis store for rate limiting (distributed deployments)
 - [ ] Webhook notifications on security events
-- [ ] Dashboard integration examples
+- [ ] Dashboard integration examples (Grafana, Kibana)
+- [ ] Express 5.x official testing
 
 ---
 
