@@ -55,6 +55,12 @@ export interface ActiveDefenseConfig {
     blockTor: boolean;
     /** Static list of blocked IP addresses */
     blockedIPs: string[];
+    /** Countries to block (ISO 3166-1 alpha-2 codes, e.g., ['RU', 'CN']) */
+    blockedCountries?: string[];
+    /** Countries to allow (allowlist mode, all others blocked) */
+    allowedCountries?: string[];
+    /** Path to MaxMind GeoIP database */
+    geoipDatabasePath?: string;
 }
 
 /**

@@ -19,6 +19,8 @@ import { randomUUID } from 'crypto';
 export * from './types';
 export { mergeConfig, validateConfig, defineNis2Config, defaultNis2Config } from './config/nis2Config';
 export { TorDetector, getTorDetector, warmTorCache } from './utils/torDetector';
+export { GeoIPService, getGeoIPService, initGeoIP } from './utils/geoipService';
+export type { GeoIPResult, GeoIPServiceOptions } from './utils/geoipService';
 
 /**
  * Create NIS2 Shield middleware with the given configuration.

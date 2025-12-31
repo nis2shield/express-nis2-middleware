@@ -7,6 +7,10 @@ import { Response, NextFunction } from 'express';
 import { Nis2Request, ActiveDefenseConfig } from '../types';
 import { getClientIP } from '../utils/ipUtils';
 import { getTorDetector } from '../utils/torDetector';
+import { getGeoIPService } from '../utils/geoipService';
+
+// Track if GeoIP has been initialized
+let geoipInitialized = false;
 
 export function handleActiveDefense(
     req: Nis2Request,
@@ -27,17 +31,48 @@ export function handleActiveDefense(
         const detector = getTorDetector();
 
         // Use sync check for non-blocking performance
-        // The cache is warmed on first async request, then sync checks are instant
         if (detector.isTorExitNodeSync(clientIP)) {
             blockRequest(res, 'Access Denied: Tor exit nodes are not allowed.');
             return;
         }
 
-        // Optionally trigger async cache refresh in background
-        // This won't block the request but ensures cache stays fresh
-        detector.isTorExitNode(clientIP).catch(() => {
-            // Silently ignore - sync check already handled this request
-        });
+        // Trigger async cache refresh in background
+        detector.isTorExitNode(clientIP).catch(() => { });
+    }
+
+    // 3. GeoIP Country Blocking
+    const hasGeoBlocking = (config.blockedCountries && config.blockedCountries.length > 0) ||
+        (config.allowedCountries && config.allowedCountries.length > 0);
+
+    if (hasGeoBlocking) {
+        const geoService = getGeoIPService({ databasePath: config.geoipDatabasePath });
+
+        // Lazy init on first request with geo-blocking
+        if (!geoipInitialized) {
+            geoService.init().then(() => {
+                geoipInitialized = true;
+            }).catch(() => { });
+        }
+
+        if (geoService.isReady()) {
+            // Check blocklist mode
+            if (config.blockedCountries && config.blockedCountries.length > 0) {
+                if (geoService.isBlocked(clientIP, config.blockedCountries)) {
+                    const result = geoService.lookup(clientIP);
+                    blockRequest(res, `Access Denied: Access from ${result.countryName || result.country || 'your region'} is not allowed.`);
+                    return;
+                }
+            }
+
+            // Check allowlist mode
+            if (config.allowedCountries && config.allowedCountries.length > 0) {
+                if (!geoService.isAllowed(clientIP, config.allowedCountries)) {
+                    const result = geoService.lookup(clientIP);
+                    blockRequest(res, `Access Denied: Access from ${result.countryName || result.country || 'your region'} is not allowed.`);
+                    return;
+                }
+            }
+        }
     }
 
     next();

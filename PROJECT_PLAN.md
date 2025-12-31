@@ -276,15 +276,22 @@ import { appendFile } from 'fs/promises';
 
 ---
 
-### 🌍 GeoIP Blocking
-- [ ] Integrate MaxMind GeoLite2 database
-- [ ] Add `blockedCountries` config option
-- [ ] Support allow-list mode (only allow specific countries)
+### 🌍 GeoIP Blocking ✅ COMPLETED
+- [x] Integrate MaxMind GeoLite2 database (optional peer dependency)
+- [x] Add `blockedCountries` config option
+- [x] Add `allowedCountries` config option (allowlist mode)
+- [x] Export `GeoIPService`, `getGeoIPService`, `initGeoIP`
 
-**Implementation approach:**
-```bash
-npm install maxmind
-# Download GeoLite2-City.mmdb from MaxMind
+**Implementation:** `src/utils/geoipService.ts`
+
+**Usage:**
+```typescript
+app.use(nis2Shield({
+  activeDefense: {
+    blockedCountries: ['RU', 'CN', 'KP'],
+    geoipDatabasePath: '/path/to/GeoLite2-Country.mmdb'
+  }
+}));
 ```
 
 ---
