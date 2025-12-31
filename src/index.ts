@@ -21,6 +21,10 @@ export { mergeConfig, validateConfig, defineNis2Config, defaultNis2Config } from
 export { TorDetector, getTorDetector, warmTorCache } from './utils/torDetector';
 export { GeoIPService, getGeoIPService, initGeoIP } from './utils/geoipService';
 export type { GeoIPResult, GeoIPServiceOptions } from './utils/geoipService';
+export { RedisStore } from './utils/redisStore';
+export type { RedisStoreOptions } from './utils/redisStore';
+export { WebhookNotifier, getWebhookNotifier, createWebhookNotifier } from './utils/webhookNotifier';
+export type { WebhookConfig, WebhookPayload, WebhookEventType } from './utils/webhookNotifier';
 
 /**
  * Create NIS2 Shield middleware with the given configuration.
