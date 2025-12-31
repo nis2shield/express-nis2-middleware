@@ -4,7 +4,7 @@
  * @module @nis2shield/express-middleware
  */
 
-import { WebhookConfig, WebhookEventType, WebhookPayload } from '../types';
+import { WebhookConfig, WebhookPayload } from '../types';
 
 /**
  * WebhookNotifier sends security event notifications to external webhooks.
