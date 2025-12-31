@@ -4,9 +4,11 @@
  */
 
 import { Response } from 'express';
-import { Nis2Config, Nis2Request, AuditLog } from '../types';
+import { Nis2Config, Nis2Request, AuditLog, LoggingConfig } from '../types';
 import { getClientIP } from '../utils/ipUtils';
 import { formatLogEntry } from '../utils/logFormatter';
+import { getFileTransport } from '../utils/fileTransport';
+import { TransportFactory } from '../utils/transportFactory';
 
 export function handleAuditing(
     req: Nis2Request,
@@ -17,8 +19,7 @@ export function handleAuditing(
     const duration = Date.now() - startTime;
     const clientIP = getClientIP(req);
 
-    // Extract user ID if available (e.g. from req.user or custom logic)
-    // This is a placeholder - usually frameworks like Passport add req.user
+    // Extract user ID if available
     const userId = req.nis2?.userId || (req as any).user?.id || (req as any).user?.email;
 
     const baseLog: Omit<AuditLog, 'integrity_hash' | 'timestamp'> = {
@@ -38,8 +39,7 @@ export function handleAuditing(
         },
         user_id: userId,
         metadata: {
-            // Allow passing custom metadata via req.nis2 if needed
-            ...req.body && !isSensitiveBody(req) ? { body_summary: '...' } : {}, // Placeholder for safer body logging
+            ...req.body && !isSensitiveBody(req) ? { body_summary: '...' } : {},
         },
     };
 
@@ -50,16 +50,18 @@ export function handleAuditing(
         config.integrityKey
     );
 
-    outputLog(auditLog, config.logging);
+    outputLog(auditLog, config.logging as LoggingConfig);
 }
 
-import { getFileTransport } from '../utils/fileTransport';
-
-function outputLog(log: AuditLog, config: Nis2Config['logging']): void {
+function outputLog(log: AuditLog, config: LoggingConfig): void {
     const output = JSON.stringify(log);
 
-    if (config.output === 'file' && config.filePath) {
-        // Use FileTransport for file output with rotation
+    if (config.output === 'file') {
+        if (!config.filePath) {
+            console.error('[NIS2 Shield] File output enabled but no filePath provided');
+            return;
+        }
+
         const transport = getFileTransport({
             filePath: config.filePath,
             maxSize: config.maxFileSize,
@@ -68,9 +70,15 @@ function outputLog(log: AuditLog, config: Nis2Config['logging']): void {
         transport.write(output);
     } else if (config.output === 'custom' && config.customHandler) {
         config.customHandler(log);
+    } else if (['splunk', 'datadog', 'qradar'].includes(config.output)) {
+        const transport = TransportFactory.getTransport(config);
+        if (transport) {
+            transport.log(log);
+        } else {
+            console.warn('[NIS2 Shield] SIEM transport not initialized or config missing. Falling back to console.');
+            console.log(output);
+        }
     } else {
-        // Console output (Standard Streams)
-        // STDOUT for Info, STDERR for Error
         if (log.level === 'ERROR') {
             console.error(output);
         } else {

@@ -1,18 +1,23 @@
-# @nis2shield/express-middleware
+# @nis2shield/express-middleware 🛡️
 
 [![npm version](https://img.shields.io/npm/v/@nis2shield/express-middleware.svg)](https://www.npmjs.com/package/@nis2shield/express-middleware)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+[![Compliance](https://img.shields.io/badge/NIS2-Compliant-orange)](https://nis2shield.com)
 
 **NIS2 Compliance Middleware for Express.js** - Forensic logging, active defense, and security headers in a single `app.use()`.
 
-## Features
+## ✨ Features (v0.3.0)
 
-- 🔐 **Forensic Logging**: JSON structured logs with HMAC-SHA256 signing
-- 🛡️ **Active Defense**: Rate limiting and IP blocking (Tor nodes)
-- 🔒 **Security Headers**: HSTS, CSP, X-Frame-Options, and more
-- 🔑 **PII Protection**: AES-256 encryption and IP anonymization
-- 📊 **SIEM Ready**: Compatible with Elasticsearch, Splunk, QRadar
+- 🔐 **Forensic Logging**: JSON structured logs with HMAC-SHA256 integrity & PII encryption.
+- 🚀 **Active Defense**:
+  - **Rate Limiting**: Token bucket algorithm.
+  - **IP Blocking**: Block static IPs, Tor exit nodes, and Countries (GeoIP).
+  - **Session Guard**: Session hijacking protection (IP/User-Agent).
+- 🚨 **Multi-SIEM Support**: Direct connectors for **Splunk HEC**, **Datadog**, and **QRadar**.
+- 🔔 **Notifications**: Webhook integration for security alerts (Slack/Teams).
+- ✅ **Compliance Engine**: Built-in CLI `npx check-nis2` to audit your configuration.
+- 🛡️ **Security Headers**: HSTS, CSP, X-Frame-Options, and more.
 
 ## Installation
 

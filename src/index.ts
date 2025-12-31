@@ -10,8 +10,9 @@ import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { handleAuditing } from './middleware/auditingMiddleware';
 import { handleRateLimit } from './middleware/rateLimitMiddleware';
 import { handleActiveDefense } from './middleware/activeDefenseMiddleware';
+import { handleSessionGuard } from './middleware/sessionGuardMiddleware';
 import { MemoryStore } from './utils/rateLimitStore';
-import type { Nis2Config, Nis2Request, Nis2Middleware, ActiveDefenseConfig, RateLimiterStore } from './types';
+import type { Nis2Config, Nis2Request, Nis2Middleware, ActiveDefenseConfig, RateLimiterStore, WebhookConfig } from './types';
 import { mergeConfig } from './config/nis2Config';
 import { randomUUID } from 'crypto';
 
@@ -24,7 +25,11 @@ export type { GeoIPResult, GeoIPServiceOptions } from './utils/geoipService';
 export { RedisStore } from './utils/redisStore';
 export type { RedisStoreOptions } from './utils/redisStore';
 export { WebhookNotifier, getWebhookNotifier, createWebhookNotifier } from './utils/webhookNotifier';
-export type { WebhookConfig, WebhookPayload, WebhookEventType } from './utils/webhookNotifier';
+
+// Export Compliance Tools
+export { ComplianceChecker } from './compliance/complianceChecker';
+export { ComplianceReportGenerator } from './compliance/reportGenerator';
+export type { ComplianceReport, ComplianceCheckResult } from './compliance/reportGenerator';
 
 /**
  * Create NIS2 Shield middleware with the given configuration.
@@ -73,6 +78,12 @@ export function nis2Shield(userConfig: Partial<Nis2Config> = {}): RequestHandler
             requestId: randomUUID(),
         };
 
+        // Initialize Webhook Notifier if configured
+        if (config.webhooks) {
+            // Just ensuring singleton is ready if needed, logic is inside utils
+            // We can pass config.webhooks to middlewares if they need it
+        }
+
         // Apply security headers
         if (config.securityHeaders.enabled) {
             applySecurityHeaders(res, config);
@@ -94,17 +105,34 @@ export function nis2Shield(userConfig: Partial<Nis2Config> = {}): RequestHandler
             handleActiveDefense(req, res, (err?: unknown) => {
                 if (err || res.headersSent) return;
 
-                // Handle Rate Limiting (Async)
-                // Only run if enabled AND store is initialized
-                if (config.activeDefense.rateLimit?.enabled && rateLimitStore) {
-                    handleRateLimit(req, res, (rlErr?: unknown) => {
-                        if (rlErr || res.headersSent) return;
-                        proceed();
-                    }, config.activeDefense.rateLimit, rateLimitStore!);
+                // Handle Session Guard
+                if (config.activeDefense.sessionGuard?.enabled) {
+                    handleSessionGuard(req, res, () => {
+                        if (res.headersSent) return;
+
+                        // Handle Rate Limiting (Async)
+                        if (config.activeDefense.rateLimit?.enabled && rateLimitStore) {
+                            handleRateLimit(req, res, (rlErr?: unknown) => {
+                                if (rlErr || res.headersSent) return;
+                                proceed();
+                            }, config.activeDefense.rateLimit, rateLimitStore!);
+                        } else {
+                            proceed();
+                        }
+                    }, config.activeDefense.sessionGuard!, config.webhooks as WebhookConfig);
                 } else {
-                    proceed();
+                    // Handle Rate Limiting (Async) - Code Duplication avoided by refactoring? 
+                    // For now, minimal intrusion logic:
+                    if (config.activeDefense.rateLimit?.enabled && rateLimitStore) {
+                        handleRateLimit(req, res, (rlErr?: unknown) => {
+                            if (rlErr || res.headersSent) return;
+                            proceed();
+                        }, config.activeDefense.rateLimit, rateLimitStore!);
+                    } else {
+                        proceed();
+                    }
                 }
-            }, config.activeDefense as ActiveDefenseConfig);
+            }, config.activeDefense as ActiveDefenseConfig, config.webhooks as WebhookConfig);
         } else {
             proceed();
         }

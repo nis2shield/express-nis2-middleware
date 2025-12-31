@@ -4,10 +4,11 @@
  */
 
 import { Response, NextFunction } from 'express';
-import { Nis2Request, ActiveDefenseConfig } from '../types';
+import { Nis2Request, ActiveDefenseConfig, WebhookConfig, WebhookEventType } from '../types';
 import { getClientIP } from '../utils/ipUtils';
 import { getTorDetector } from '../utils/torDetector';
 import { getGeoIPService } from '../utils/geoipService';
+import { getWebhookNotifier } from '../utils/webhookNotifier';
 
 // Track if GeoIP has been initialized
 let geoipInitialized = false;
@@ -16,13 +17,28 @@ export function handleActiveDefense(
     req: Nis2Request,
     res: Response,
     next: NextFunction,
-    config: ActiveDefenseConfig
+    config: ActiveDefenseConfig,
+    webhookConfig?: WebhookConfig
 ): void {
     const clientIP = getClientIP(req);
+    const notifier = getWebhookNotifier(webhookConfig);
+    const notify = (event: WebhookEventType, message: string, metadata?: any) => {
+        if (notifier) {
+            notifier.notify({
+                event,
+                ip: clientIP,
+                path: req.originalUrl || req.url,
+                method: req.method,
+                message,
+                metadata
+            });
+        }
+    };
 
     // 1. Check blocked static IPs
     if (config.blockedIPs && config.blockedIPs.includes(clientIP)) {
         blockRequest(res, 'Access Denied: IP address is blocked.');
+        notify('blocked_ip', 'Blocked static IP', { blockedIP: clientIP });
         return;
     }
 
@@ -33,6 +49,7 @@ export function handleActiveDefense(
         // Use sync check for non-blocking performance
         if (detector.isTorExitNodeSync(clientIP)) {
             blockRequest(res, 'Access Denied: Tor exit nodes are not allowed.');
+            notify('tor_blocked', 'Blocked Tor exit node');
             return;
         }
 
@@ -60,6 +77,7 @@ export function handleActiveDefense(
                 if (geoService.isBlocked(clientIP, config.blockedCountries)) {
                     const result = geoService.lookup(clientIP);
                     blockRequest(res, `Access Denied: Access from ${result.countryName || result.country || 'your region'} is not allowed.`);
+                    notify('geo_blocked', `Blocked country: ${result.country}`, { country: result.country });
                     return;
                 }
             }
@@ -69,6 +87,7 @@ export function handleActiveDefense(
                 if (!geoService.isAllowed(clientIP, config.allowedCountries)) {
                     const result = geoService.lookup(clientIP);
                     blockRequest(res, `Access Denied: Access from ${result.countryName || result.country || 'your region'} is not allowed.`);
+                    notify('geo_blocked', `Blocked non-allowlisted country: ${result.country}`, { country: result.country });
                     return;
                 }
             }

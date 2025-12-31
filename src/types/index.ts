@@ -18,7 +18,7 @@ export interface LoggingConfig {
     /** Fields to encrypt (default: ['userId', 'email']) */
     piiFields: string[];
     /** Log output destination */
-    output: 'console' | 'file' | 'custom';
+    output: 'console' | 'file' | 'custom' | 'splunk' | 'datadog' | 'qradar';
     /** Custom log file path (when output is 'file') */
     filePath?: string;
     /** Maximum file size in bytes before rotation (default: 10MB) */
@@ -27,6 +27,31 @@ export interface LoggingConfig {
     maxFiles?: number;
     /** Custom log handler (when output is 'custom') */
     customHandler?: (log: AuditLog) => void;
+    /** Splunk HEC Configuration */
+    splunk?: {
+        url: string;
+        token: string;
+        source?: string;
+        sourcetype?: string;
+        index?: string;
+        batchInterval?: number;
+        batchSize?: number;
+    };
+    /** Datadog Logs Configuration */
+    datadog?: {
+        apiKey: string;
+        site?: 'datadoghq.com' | 'datadoghq.eu' | 'us3.datadoghq.com' | 'us5.datadoghq.com' | 'ap1.datadoghq.com';
+        service?: string;
+        ddsource?: string;
+        ddtags?: string;
+    };
+    /** QRadar / Syslog Configuration */
+    qradar?: {
+        host: string;
+        port: number;
+        protocol?: 'tcp' | 'udp' | 'tls';
+        transformToCEF?: boolean;
+    };
 }
 
 /**
@@ -61,6 +86,61 @@ export interface ActiveDefenseConfig {
     allowedCountries?: string[];
     /** Path to MaxMind GeoIP database */
     geoipDatabasePath?: string;
+    /** Session Guard configuration */
+    sessionGuard?: SessionGuardConfig;
+}
+
+/**
+ * Session Guard configuration
+ */
+export interface SessionGuardConfig {
+    /** Enable/disable session hijacking protection */
+    enabled: boolean;
+    /** Validate IP address consistency (session must stick to IP) */
+    validateIP: boolean;
+    /** Validate User-Agent consistency */
+    validateUserAgent: boolean;
+}
+
+/**
+ * Webhook event type
+ */
+export type WebhookEventType =
+    | 'rate_limit'
+    | 'blocked_ip'
+    | 'tor_blocked'
+    | 'geo_blocked'
+    | 'security_header'
+    | 'audit_log'
+    | 'session_hijacking';
+
+/**
+ * Webhook configuration
+ */
+export interface WebhookConfig {
+    /** Webhook URL to send notifications to */
+    url: string;
+    /** Events to notify on (default: all) */
+    events?: WebhookEventType[];
+    /** Custom headers to include */
+    headers?: Record<string, string>;
+    /** Retry attempts on failure (default: 3) */
+    retries?: number;
+    /** Timeout in milliseconds (default: 5000) */
+    timeout?: number;
+}
+
+/**
+ * Webhook payload structure
+ */
+export interface WebhookPayload {
+    event: WebhookEventType;
+    timestamp: string;
+    ip: string;
+    path: string;
+    method: string;
+    message: string;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -97,6 +177,8 @@ export interface Nis2Config {
     activeDefense: Partial<ActiveDefenseConfig>;
     /** Security headers configuration */
     securityHeaders: Partial<SecurityHeadersConfig>;
+    /** Webhook notifications configuration */
+    webhooks?: Partial<WebhookConfig>;
 }
 
 /**

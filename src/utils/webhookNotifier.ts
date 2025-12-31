@@ -4,36 +4,7 @@
  * @module @nis2shield/express-middleware
  */
 
-export type WebhookEventType =
-    | 'rate_limit'
-    | 'blocked_ip'
-    | 'tor_blocked'
-    | 'geo_blocked'
-    | 'security_header'
-    | 'audit_log';
-
-export interface WebhookConfig {
-    /** Webhook URL to send notifications to */
-    url: string;
-    /** Events to notify on (default: all) */
-    events?: WebhookEventType[];
-    /** Custom headers to include */
-    headers?: Record<string, string>;
-    /** Retry attempts on failure (default: 3) */
-    retries?: number;
-    /** Timeout in milliseconds (default: 5000) */
-    timeout?: number;
-}
-
-export interface WebhookPayload {
-    event: WebhookEventType;
-    timestamp: string;
-    ip: string;
-    path: string;
-    method: string;
-    message: string;
-    metadata?: Record<string, unknown>;
-}
+import { WebhookConfig, WebhookEventType, WebhookPayload } from '../types';
 
 /**
  * WebhookNotifier sends security event notifications to external webhooks.

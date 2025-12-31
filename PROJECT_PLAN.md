@@ -248,6 +248,25 @@ Il formato JSON è identico a Django e Spring per garantire dashboard uniformi.
 
 ---
 
+## 🚀 Roadmap v0.3.0 (Alignment with Django/Spring)
+
+### Fase 6: Multi-SIEM & Advanced Defense
+- [ ] **Multi-SIEM Connectors**:
+    - [ ] Splunk HEC Transport
+    - [ ] Datadog Logs Transport
+    - [ ] QRadar (CEF) Transport
+- [ ] **Session Guard**:
+    - [ ] Middleware Anti-Hijacking (IP/UA/TLS fingerprinting)
+- [ ] **Webhooks**:
+    - [ ] Wiring `WebhookNotifier` into Active Defense events
+
+### Fase 7: Compliance Engine
+- [ ] **CLI Tool**: `check-nis2` script
+- [ ] **Compliance Reports**: HTML & JSON generation
+
+
+---
+
 ## 🚀 Roadmap v0.2.0+
 
 ### 📁 File Output with Rotation ✅ COMPLETED

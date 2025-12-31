@@ -12,8 +12,12 @@
             "import": "./dist/index.mjs"
         }
     },
+    "bin": {
+        "check-nis2": "./bin/check-nis2.js"
+    },
     "files": [
         "dist",
+        "bin",
         "README.md",
         "LICENSE"
     ],
