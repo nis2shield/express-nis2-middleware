@@ -118,6 +118,19 @@ NIS2_HMAC_KEY=your-secret-hmac-key
 - [nis2-spring-shield](https://central.sonatype.com/artifact/com.nis2shield/nis2-spring-shield) - Java/Spring Boot
 - [@nis2shield/react-guard](https://www.npmjs.com/package/@nis2shield/react-guard) - React/Frontend
 
+## Release Process
+
+Automated releases are handled via GitHub Actions.
+
+1. **Create Tag**: Push a new tag (e.g., `v0.2.0`).
+2. **GitHub Release**: Create a release in the GitHub UI.
+3. **CI/CD**: The `npm-publish.yml` workflow triggers automatically:
+    - Builds the project.
+    - Runs tests.
+    - Publishes to **npm** (using `NPM_TOKEN` secret).
+
+---
+
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details.
