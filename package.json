@@ -42,7 +42,12 @@
         "audit",
         "gdpr",
         "rate-limiting",
-        "forensic"
+        "forensic",
+        "cybersecurity",
+        "enterprise",
+        "security-headers",
+        "siem",
+        "session-guard"
     ],
     "author": "NIS2 Shield Team <hello@nis2shield.com>",
     "license": "MIT",

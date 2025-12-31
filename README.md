@@ -7,6 +7,17 @@
 
 **NIS2 Compliance Middleware for Express.js** - Forensic logging, active defense, and security headers in a single `app.use()`.
 
+## Why this package?
+
+Companies subject to NIS2 Directive require strict logging, monitoring, and active defense measures. This middleware provides:
+
+1. **Forensic Logging**: JSON logs signed with HMAC-SHA256, PII encryption (Art. 21.2.h)
+2. **Rate Limiting**: Token bucket algorithm to prevent DoS/Brute Force (Art. 21.2.e)
+3. **IP/Geo Blocking**: Block Tor exit nodes, countries, malicious IPs (Art. 21.2.a)
+4. **Session Guard**: Detect session hijacking via IP/User-Agent validation
+5. **Multi-SIEM**: Direct connectors for Splunk, Datadog, QRadar
+6. **Compliance CLI**: Audit your configuration with `npx check-nis2`
+
 ## ✨ Features (v0.3.0)
 
 - 🔐 **Forensic Logging**: JSON structured logs with HMAC-SHA256 integrity & PII encryption.
@@ -115,6 +126,76 @@ NIS2_HMAC_KEY=your-secret-hmac-key
   },
   "integrity_hash": "a1b2c3d4..."
 }
+```
+
+## 📖 Recipes
+
+### Banking API with Strict Rate Limiting
+
+```typescript
+import express from 'express';
+import { nis2Shield } from '@nis2shield/express-middleware';
+
+const app = express();
+
+app.use(nis2Shield({
+  enabled: true,
+  encryptionKey: process.env.NIS2_ENCRYPTION_KEY,
+  integrityKey: process.env.NIS2_HMAC_KEY,
+  
+  activeDefense: {
+    rateLimit: {
+      enabled: true,
+      windowMs: 60000,
+      max: 30,  // Strict: 30 req/min for banking
+    },
+    blockTor: true,
+    blockedCountries: ['KP', 'IR'],  // OFAC compliance
+  },
+  
+  securityHeaders: {
+    enabled: true,
+    hsts: true,
+    xFrameOptions: 'DENY',
+  },
+}));
+```
+
+### E-commerce with Slack Alerts
+
+```typescript
+import { nis2Shield, createWebhookNotifier } from '@nis2shield/express-middleware';
+
+const webhookNotifier = createWebhookNotifier({
+  url: 'https://hooks.slack.com/services/...',
+  format: 'slack',
+  events: ['rate_limit', 'session_hijack', 'blocked_ip'],
+});
+
+app.use(nis2Shield({
+  enabled: true,
+  webhooks: webhookNotifier,
+  logging: {
+    enabled: true,
+    anonymizeIP: true,
+    encryptPII: true,
+  },
+}));
+```
+
+### Microservice with Datadog SIEM
+
+```typescript
+import { nis2Shield } from '@nis2shield/express-middleware';
+
+app.use(nis2Shield({
+  enabled: true,
+  siem: {
+    type: 'datadog',
+    apiKey: process.env.DD_API_KEY,
+    site: 'datadoghq.eu',
+  },
+}));
 ```
 
 ## Related Projects

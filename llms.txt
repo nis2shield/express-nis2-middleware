@@ -1,0 +1,40 @@
+# @nis2shield/express-middleware - AI Context
+
+## What is this library?
+An Express.js middleware for NIS2 Directive compliance.
+Provides forensic logging, rate limiting, IP blocking, session guard, and security headers.
+
+## Core Function
+```typescript
+import { nis2Shield } from '@nis2shield/express-middleware';
+app.use(nis2Shield({ enabled: true }));
+```
+
+## Key Features
+- Forensic Logging: JSON with HMAC-SHA256 integrity, PII encryption
+- Rate Limiting: Token bucket algorithm
+- IP Blocking: Static IPs, Tor exit nodes, countries (GeoIP)
+- Session Guard: IP/User-Agent validation
+- Security Headers: HSTS, CSP, X-Frame-Options
+- SIEM: Splunk HEC, Datadog, QRadar connectors
+- Webhooks: Slack/Teams alerts for security events
+- Compliance CLI: `npx check-nis2`
+
+## Configuration
+```typescript
+nis2Shield({
+  encryptionKey: process.env.NIS2_ENCRYPTION_KEY,  // AES-256
+  integrityKey: process.env.NIS2_HMAC_KEY,         // HMAC signing
+  logging: { enabled: true, anonymizeIP: true, encryptPII: true },
+  activeDefense: {
+    rateLimit: { enabled: true, windowMs: 60000, max: 100 },
+    blockTor: true,
+  },
+  securityHeaders: { enabled: true, hsts: true },
+})
+```
+
+## NIS2 Articles Addressed
+- Art. 21.2.a: IP blocking, Tor detection
+- Art. 21.2.e: Rate limiting, DoS protection
+- Art. 21.2.h: Log integrity, audit trails
