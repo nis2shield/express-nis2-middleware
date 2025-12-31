@@ -21,6 +21,8 @@ export const nis2ConfigSchema = z.object({
             piiFields: z.array(z.string()).default(['userId', 'email']),
             output: z.enum(['console', 'file', 'custom']).default('console'),
             filePath: z.string().optional(),
+            maxFileSize: z.number().default(10 * 1024 * 1024), // 10MB
+            maxFiles: z.number().default(5),
             customHandler: z.function().optional(),
         })
         .default({}),

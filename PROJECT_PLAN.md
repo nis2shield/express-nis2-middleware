@@ -250,11 +250,13 @@ Il formato JSON è identico a Django e Spring per garantire dashboard uniformi.
 
 ## 🚀 Roadmap v0.2.0+
 
-### 📁 File Output with Rotation
-- [ ] Implement proper file output in `outputLog()` function
-- [ ] Integrate with [Pino](https://github.com/pinojs/pino) or [Winston](https://github.com/winstonjs/winston)
-- [ ] Add log rotation configuration (size-based, time-based)
-- [ ] Support multiple simultaneous outputs
+### 📁 File Output with Rotation ✅ COMPLETED
+- [x] Implement proper file output in `outputLog()` function
+- [x] Create `FileTransport` class with rotation support
+- [x] Add rotation configuration (size-based: `maxFileSize`, `maxFiles`)
+- [x] Fallback to console on write errors
+
+**Implementation:** `src/utils/fileTransport.ts`
 
 **Implementation approach:**
 ```typescript

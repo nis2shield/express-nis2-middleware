@@ -53,13 +53,19 @@ export function handleAuditing(
     outputLog(auditLog, config.logging);
 }
 
+import { getFileTransport } from '../utils/fileTransport';
+
 function outputLog(log: AuditLog, config: Nis2Config['logging']): void {
     const output = JSON.stringify(log);
 
     if (config.output === 'file' && config.filePath) {
-        // TODO: Implement file writing using a stream or logging lib
-        // For now fallback to console in this MVP step
-        console.log(output);
+        // Use FileTransport for file output with rotation
+        const transport = getFileTransport({
+            filePath: config.filePath,
+            maxSize: config.maxFileSize,
+            maxFiles: config.maxFiles,
+        });
+        transport.write(output);
     } else if (config.output === 'custom' && config.customHandler) {
         config.customHandler(log);
     } else {

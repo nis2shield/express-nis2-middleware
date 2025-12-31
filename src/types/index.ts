@@ -21,6 +21,10 @@ export interface LoggingConfig {
     output: 'console' | 'file' | 'custom';
     /** Custom log file path (when output is 'file') */
     filePath?: string;
+    /** Maximum file size in bytes before rotation (default: 10MB) */
+    maxFileSize?: number;
+    /** Maximum number of rotated files to keep (default: 5) */
+    maxFiles?: number;
     /** Custom log handler (when output is 'custom') */
     customHandler?: (log: AuditLog) => void;
 }
