@@ -2,7 +2,13 @@ name: Publish to npm
 
 on:
   release:
-    types: [created]
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (skip actual npm publish)'
+        type: boolean
+        default: false
 
 jobs:
   publish:
@@ -32,6 +38,13 @@ jobs:
         run: npm run build
       
       - name: Publish to npm
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Dry run - skip publish
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: |
+          echo "🧪 Dry run mode - skipping npm publish"
+          echo "Package would be published with version: $(node -p "require('./package.json').version")"
