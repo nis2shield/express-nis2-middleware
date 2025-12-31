@@ -6,13 +6,7 @@
 import { Response, NextFunction } from 'express';
 import { Nis2Request, ActiveDefenseConfig } from '../types';
 import { getClientIP } from '../utils/ipUtils';
-
-// Helper to check if IP is a Tor exit node
-// In a real implementation, this would query a dynamic list or service
-// For MVP, we'll use a placeholder logic or allow users to provide the list
-const KNOWN_TOR_IPS = new Set<string>([
-    // Placeholder for Tor IPs
-]);
+import { getTorDetector } from '../utils/torDetector';
 
 export function handleActiveDefense(
     req: Nis2Request,
@@ -28,12 +22,22 @@ export function handleActiveDefense(
         return;
     }
 
-    // 2. Check Tor Exit Nodes
+    // 2. Check Tor Exit Nodes (using real Tor detection)
     if (config.blockTor) {
-        if (KNOWN_TOR_IPS.has(clientIP) || isSimulatedTor(clientIP)) {
+        const detector = getTorDetector();
+
+        // Use sync check for non-blocking performance
+        // The cache is warmed on first async request, then sync checks are instant
+        if (detector.isTorExitNodeSync(clientIP)) {
             blockRequest(res, 'Access Denied: Tor exit nodes are not allowed.');
             return;
         }
+
+        // Optionally trigger async cache refresh in background
+        // This won't block the request but ensures cache stays fresh
+        detector.isTorExitNode(clientIP).catch(() => {
+            // Silently ignore - sync check already handled this request
+        });
     }
 
     next();
@@ -45,13 +49,4 @@ function blockRequest(res: Response, message: string): void {
         message: message,
         timestamp: new Date().toISOString()
     });
-}
-
-/**
- * For testing/demo purposes, assume 1.1.1.1 is valid but 6.6.6.6 is Tor
- * In production this would check against a real threat intel feed
- */
-function isSimulatedTor(ip: string): boolean {
-    // Hardcoded for testing active defense logic without external dependency
-    return ip === '6.6.6.6';
 }

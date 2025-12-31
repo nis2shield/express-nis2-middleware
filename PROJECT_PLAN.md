@@ -266,16 +266,13 @@ import { appendFile } from 'fs/promises';
 
 ---
 
-### 🧅 Real Tor Exit Node Detection
-- [ ] Fetch real Tor exit node list from TorProject API
-- [ ] Cache list with periodic refresh (every 6 hours)
-- [ ] Optional: Integrate with AbuseIPDB or IPQualityScore API
+### 🧅 Real Tor Exit Node Detection ✅ COMPLETED
+- [x] Fetch real Tor exit node list from TorProject API
+- [x] Cache list with periodic refresh (every 6 hours)
+- [x] Sync and async check methods for performance
+- [x] Export `TorDetector`, `getTorDetector`, `warmTorCache`
 
-**Implementation approach:**
-```typescript
-const TOR_EXIT_LIST_URL = 'https://check.torproject.org/torbulkexitlist';
-// Fetch on startup, refresh periodically
-```
+**Implementation:** `src/utils/torDetector.ts`
 
 ---
 
