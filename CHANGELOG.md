@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.0] - 2026-01-01
+## [0.3.4] - 2026-01-01
 
 ### Added
 - **Multi-SIEM Support**: Added `SplunkTransport` (HEC) and `DatadogTransport` for direct log shipping.
