@@ -44,7 +44,19 @@ export class WebhookNotifier {
     }
 
     /**
-     * Send a notification (non-blocking, queued)
+     * Send a notification (non-blocking, queued).
+     * 
+     * @example
+     * ```typescript
+     * notifier.notify({
+     *   event: 'security_header',
+     *   ip: '203.0.113.45',
+     *   path: '/admin',
+     *   method: 'GET',
+     *   message: 'Missing Content-Security-Policy header',
+     *   metadata: { violation: 'script-src' }
+     * });
+     * ```
      */
     notify(payload: Omit<WebhookPayload, 'timestamp'>): void {
         // Check if event type is enabled

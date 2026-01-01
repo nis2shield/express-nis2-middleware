@@ -162,7 +162,30 @@ export interface SecurityHeadersConfig {
 }
 
 /**
- * Main NIS2 Shield configuration
+ * Main NIS2 Shield configuration.
+ * Defines the security posture, logging targets, and active defense mechanisms.
+ * 
+ * @example
+ * ```typescript
+ * const config: Nis2Config = {
+ *   enabled: true,
+ *   encryptionKey: process.env.NIS2_ENC_KEY,
+ *   
+ *   // Art. 21.2.d - Supply Chain Security
+ *   activeDefense: {
+ *     rateLimit: { enabled: true, max: 500, windowMs: 60000 },
+ *     blockTor: true,
+ *     blockedCountries: ['NK', 'IR'] // Sanctioned list
+ *   },
+ * 
+ *   // Art. 21.2.c - Incident Handling
+ *   logging: {
+ *     output: 'datadog',
+ *     datadog: { apiKey: '...', service: 'payment-api' },
+ *     piiFields: ['email', 'iban'] // These will be encrypted
+ *   }
+ * };
+ * ```
  */
 export interface Nis2Config {
     /** Enable/disable the entire middleware */
