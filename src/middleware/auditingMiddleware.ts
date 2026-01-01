@@ -8,7 +8,7 @@ import { Nis2Config, Nis2Request, AuditLog, LoggingConfig } from '../types';
 import { getClientIP } from '../utils/ipUtils';
 import { formatLogEntry } from '../utils/logFormatter';
 import { getFileTransport } from '../utils/fileTransport';
-import { TransportFactory } from '../utils/transportFactory';
+import { SiemTransportManager } from '../utils/siemTransport';
 
 export function handleAuditing(
     req: Nis2Request,
@@ -50,13 +50,22 @@ export function handleAuditing(
         config.integrityKey
     );
 
-    outputLog(auditLog, config.logging as LoggingConfig);
+    outputLog(auditLog, config.logging as LoggingConfig, config);
 }
 
-function outputLog(log: AuditLog, config: LoggingConfig): void {
+function outputLog(log: AuditLog, config: LoggingConfig, fullConfig: Nis2Config): void {
     const output = JSON.stringify(log);
 
-    if (config.output === 'file') {
+    // 1. Console Output
+    if (config.output === 'console') {
+        if (log.level === 'ERROR') {
+            console.error(output);
+        } else {
+            console.log(output);
+        }
+    }
+    // 2. File Output
+    else if (config.output === 'file') {
         if (!config.filePath) {
             console.error('[NIS2 Shield] File output enabled but no filePath provided');
             return;
@@ -68,22 +77,16 @@ function outputLog(log: AuditLog, config: LoggingConfig): void {
             maxFiles: config.maxFiles,
         });
         transport.write(output);
-    } else if (config.output === 'custom' && config.customHandler) {
+    }
+    // 3. Custom Output
+    else if (config.output === 'custom' && config.customHandler) {
         config.customHandler(log);
-    } else if (['splunk', 'datadog', 'qradar'].includes(config.output)) {
-        const transport = TransportFactory.getTransport(config);
-        if (transport) {
-            transport.log(log);
-        } else {
-            console.warn('[NIS2 Shield] SIEM transport not initialized or config missing. Falling back to console.');
-            console.log(output);
-        }
-    } else {
-        if (log.level === 'ERROR') {
-            console.error(output);
-        } else {
-            console.log(output);
-        }
+    }
+
+    // 4. SIEM Broadcast (Always runs if enabled, regardless of primary output)
+    if (fullConfig.siem && fullConfig.siem.enabled) {
+        const siemManager = new SiemTransportManager(fullConfig.siem); // In real app, singleton this
+        siemManager.broadcast(log);
     }
 }
 

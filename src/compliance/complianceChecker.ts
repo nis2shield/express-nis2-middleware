@@ -86,7 +86,7 @@ export class ComplianceChecker {
 
         // 8. SIEM/Notifications (Art. 21.2.b - Incident Handling)
         const siem = ['splunk', 'datadog', 'qradar'].includes(this.config.logging?.output as string);
-        const webhooks = !!this.config.webhooks?.url;
+        const webhooks = !!(this.config.webhooks?.endpoints && this.config.webhooks.endpoints.length > 0);
         checks.push({
             id: 'incident-response',
             description: 'Incident Response / SIEM Integration (Art. 21.2.b)',

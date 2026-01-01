@@ -1,187 +1,97 @@
-/**
- * Webhook Notifier for Security Events
- * Sends notifications to external webhooks when security events occur
- * @module @nis2shield/express-middleware
- */
+import { WebhookConfig } from '../config/nis2Config';
 
-import { WebhookConfig, WebhookPayload } from '../types';
-
-/**
- * WebhookNotifier sends security event notifications to external webhooks.
- * 
- * @example
- * ```typescript
- * import { WebhookNotifier } from '@nis2shield/express-middleware';
- * 
- * const notifier = new WebhookNotifier({
- *   url: 'https://hooks.slack.com/...',
- *   events: ['rate_limit', 'blocked_ip']
- * });
- * 
- * // Called automatically by middleware, or manually:
- * await notifier.notify({
- *   event: 'rate_limit',
- *   ip: '192.168.1.100',
- *   path: '/api/login',
- *   method: 'POST',
- *   message: 'Rate limit exceeded'
- * });
- * ```
- */
 export class WebhookNotifier {
-    private config: Required<Omit<WebhookConfig, 'headers'>> & { headers?: Record<string, string> };
-    private queue: WebhookPayload[] = [];
-    private processing: boolean = false;
+    constructor(private config: WebhookConfig) { }
 
-    constructor(config: WebhookConfig) {
-        this.config = {
-            url: config.url,
-            events: config.events || ['rate_limit', 'blocked_ip', 'tor_blocked', 'geo_blocked'],
-            headers: config.headers,
-            retries: config.retries ?? 3,
-            timeout: config.timeout ?? 5000,
-        };
-    }
+    async notify(evenType: string, message: string, details?: any): Promise<void>;
+    async notify(payload: { event: string; message: string; ip?: string; path?: string; method?: string; metadata?: any }): Promise<void>;
+    async notify(arg1: any, arg2?: any, arg3?: any): Promise<void> {
+        let event: string;
+        let message: string;
+        let details: any = {};
 
-    /**
-     * Send a notification (non-blocking, queued).
-     * 
-     * @example
-     * ```typescript
-     * notifier.notify({
-     *   event: 'security_header',
-     *   ip: '203.0.113.45',
-     *   path: '/admin',
-     *   method: 'GET',
-     *   message: 'Missing Content-Security-Policy header',
-     *   metadata: { violation: 'script-src' }
-     * });
-     * ```
-     */
-    notify(payload: Omit<WebhookPayload, 'timestamp'>): void {
-        // Check if event type is enabled
-        if (!this.config.events.includes(payload.event)) {
-            return;
+        if (typeof arg1 === 'object') {
+            event = arg1.event;
+            message = arg1.message;
+            details = { ...arg1 };
+            delete details.event;
+            delete details.message;
+        } else {
+            event = arg1;
+            message = arg2;
+            details = arg3 || {};
         }
 
-        const fullPayload: WebhookPayload = {
-            ...payload,
-            timestamp: new Date().toISOString(),
-        };
+        if (!this.config.enabled || this.config.endpoints.length === 0) return;
 
-        this.queue.push(fullPayload);
-        this.processQueue();
+        const relevantEndpoints = this.config.endpoints.filter(
+            (ep) => ep.events.includes('all') || ep.events.includes(event as any),
+        );
+
+        if (relevantEndpoints.length === 0) return;
+
+        const formattedMessage = this.formatMessage(event, message, details);
+
+        const promises = relevantEndpoints.map((ep) =>
+            this.sendToEndpoint(ep, formattedMessage, details).catch((err) =>
+                console.error(`[NIS2 Webhook Failed] ${ep.url}:`, err),
+            ),
+        );
+
+        // Fire and forget, but catch global rejections in background
+        Promise.allSettled(promises);
     }
 
-    /**
-     * Process queued notifications
-     */
-    private async processQueue(): Promise<void> {
-        if (this.processing || this.queue.length === 0) {
-            return;
+    private async sendToEndpoint(endpoint: any, text: string, details: any) {
+        let body: any;
+
+        if (endpoint.type === 'slack') {
+            body = { text, attachments: [{ color: '#ff0000', fields: this.toSlackFields(details) }] };
+        } else if (endpoint.type === 'teams') {
+            body = {
+                "@type": "MessageCard",
+                "text": text,
+                "sections": [{ "facts": this.toTeamsFacts(details) }]
+            };
+        } else if (endpoint.type === 'discord') {
+            body = { content: text };
+        } else {
+            // Generic
+            body = { event: 'NIS2_ALERT', message: text, details };
         }
 
-        this.processing = true;
-
-        while (this.queue.length > 0) {
-            const payload = this.queue.shift();
-            if (payload) {
-                await this.sendWithRetry(payload);
-            }
-        }
-
-        this.processing = false;
+        await fetch(endpoint.url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
     }
 
-    /**
-     * Send with retry logic
-     */
-    private async sendWithRetry(payload: WebhookPayload): Promise<boolean> {
-        let lastError: Error | null = null;
-
-        for (let attempt = 1; attempt <= this.config.retries; attempt++) {
-            try {
-                await this.send(payload);
-                return true;
-            } catch (error) {
-                lastError = error as Error;
-
-                // Wait before retry (exponential backoff)
-                if (attempt < this.config.retries) {
-                    await this.sleep(Math.min(1000 * Math.pow(2, attempt - 1), 10000));
-                }
-            }
-        }
-
-        console.error(`[NIS2 Shield] Webhook failed after ${this.config.retries} attempts:`, lastError?.message);
-        return false;
+    private formatMessage(event: string, baseMessage: string, details: any): string {
+        const icon = '🛡️ [NIS2 SHIELD]';
+        return `${icon} [${event.toUpperCase()}] ${baseMessage} | ${JSON.stringify(details)}`;
     }
 
-    /**
-     * Send the actual HTTP request
-     */
-    private async send(payload: WebhookPayload): Promise<void> {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
-
-        try {
-            const response = await fetch(this.config.url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'NIS2Shield-WebhookNotifier/1.0',
-                    ...this.config.headers,
-                },
-                body: JSON.stringify(payload),
-                signal: controller.signal,
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-        } finally {
-            clearTimeout(timeoutId);
-        }
+    private toSlackFields(details: any) {
+        return Object.entries(details).map(([k, v]) => ({ title: k, value: String(v), short: true }));
     }
 
-    /**
-     * Sleep helper
-     */
-    private sleep(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    /**
-     * Get pending queue size
-     */
-    getPendingCount(): number {
-        return this.queue.length;
-    }
-
-    /**
-     * Check if notifier is processing
-     */
-    isProcessing(): boolean {
-        return this.processing;
+    private toTeamsFacts(details: any) {
+        return Object.entries(details).map(([k, v]) => ({ name: k, value: String(v) }));
     }
 }
 
-// Global notifier instance cache
-let defaultNotifier: WebhookNotifier | null = null;
+// Singleton instance container
+let instance: WebhookNotifier | null = null;
 
-/**
- * Get or create a WebhookNotifier instance
- */
-export function getWebhookNotifier(config?: WebhookConfig): WebhookNotifier | null {
-    if (config && !defaultNotifier) {
-        defaultNotifier = new WebhookNotifier(config);
+export const createWebhookNotifier = (config: WebhookConfig): WebhookNotifier => {
+    instance = new WebhookNotifier(config);
+    return instance;
+};
+
+export const getWebhookNotifier = (config?: WebhookConfig): WebhookNotifier | null => {
+    if (!instance && config) {
+        return createWebhookNotifier(config);
     }
-    return defaultNotifier;
-}
-
-/**
- * Create a webhook notifier for a specific config
- */
-export function createWebhookNotifier(config: WebhookConfig): WebhookNotifier {
-    return new WebhookNotifier(config);
-}
+    return instance;
+};

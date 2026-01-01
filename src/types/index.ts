@@ -4,6 +4,10 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { SiemConfig, WebhookConfig, SessionGuardConfig } from '../config/nis2Config';
+
+// Re-export configs from internal config/nis2Config to avoid circular deps or just for convenience
+export { SiemConfig, WebhookConfig, SessionGuardConfig };
 
 /**
  * Logging configuration options
@@ -27,31 +31,6 @@ export interface LoggingConfig {
     maxFiles?: number;
     /** Custom log handler (when output is 'custom') */
     customHandler?: (log: AuditLog) => void;
-    /** Splunk HEC Configuration */
-    splunk?: {
-        url: string;
-        token: string;
-        source?: string;
-        sourcetype?: string;
-        index?: string;
-        batchInterval?: number;
-        batchSize?: number;
-    };
-    /** Datadog Logs Configuration */
-    datadog?: {
-        apiKey: string;
-        site?: 'datadoghq.com' | 'datadoghq.eu' | 'us3.datadoghq.com' | 'us5.datadoghq.com' | 'ap1.datadoghq.com';
-        service?: string;
-        ddsource?: string;
-        ddtags?: string;
-    };
-    /** QRadar / Syslog Configuration */
-    qradar?: {
-        host: string;
-        port: number;
-        protocol?: 'tcp' | 'udp' | 'tls';
-        transformToCEF?: boolean;
-    };
 }
 
 /**
@@ -91,18 +70,6 @@ export interface ActiveDefenseConfig {
 }
 
 /**
- * Session Guard configuration
- */
-export interface SessionGuardConfig {
-    /** Enable/disable session hijacking protection */
-    enabled: boolean;
-    /** Validate IP address consistency (session must stick to IP) */
-    validateIP: boolean;
-    /** Validate User-Agent consistency */
-    validateUserAgent: boolean;
-}
-
-/**
  * Webhook event type
  */
 export type WebhookEventType =
@@ -112,36 +79,7 @@ export type WebhookEventType =
     | 'geo_blocked'
     | 'security_header'
     | 'audit_log'
-    | 'session_hijacking';
-
-/**
- * Webhook configuration
- */
-export interface WebhookConfig {
-    /** Webhook URL to send notifications to */
-    url: string;
-    /** Events to notify on (default: all) */
-    events?: WebhookEventType[];
-    /** Custom headers to include */
-    headers?: Record<string, string>;
-    /** Retry attempts on failure (default: 3) */
-    retries?: number;
-    /** Timeout in milliseconds (default: 5000) */
-    timeout?: number;
-}
-
-/**
- * Webhook payload structure
- */
-export interface WebhookPayload {
-    event: WebhookEventType;
-    timestamp: string;
-    ip: string;
-    path: string;
-    method: string;
-    message: string;
-    metadata?: Record<string, unknown>;
-}
+    | 'session_hijacking'; // Added session_hijacking
 
 /**
  * Security headers configuration
@@ -163,29 +101,6 @@ export interface SecurityHeadersConfig {
 
 /**
  * Main NIS2 Shield configuration.
- * Defines the security posture, logging targets, and active defense mechanisms.
- * 
- * @example
- * ```typescript
- * const config: Nis2Config = {
- *   enabled: true,
- *   encryptionKey: process.env.NIS2_ENC_KEY,
- *   
- *   // Art. 21.2.d - Supply Chain Security
- *   activeDefense: {
- *     rateLimit: { enabled: true, max: 500, windowMs: 60000 },
- *     blockTor: true,
- *     blockedCountries: ['NK', 'IR'] // Sanctioned list
- *   },
- * 
- *   // Art. 21.2.c - Incident Handling
- *   logging: {
- *     output: 'datadog',
- *     datadog: { apiKey: '...', service: 'payment-api' },
- *     piiFields: ['email', 'iban'] // These will be encrypted
- *   }
- * };
- * ```
  */
 export interface Nis2Config {
     /** Enable/disable the entire middleware */
@@ -200,8 +115,14 @@ export interface Nis2Config {
     activeDefense: Partial<ActiveDefenseConfig>;
     /** Security headers configuration */
     securityHeaders: Partial<SecurityHeadersConfig>;
-    /** Webhook notifications configuration */
+
+    // v0.3.0 New Features
+    /** SIEM Configuration */
+    siem?: Partial<SiemConfig>;
+    /** Webhook Notifications Configuration */
     webhooks?: Partial<WebhookConfig>;
+    /** Session Guard Configuration */
+    sessionGuard?: Partial<SessionGuardConfig>;
 }
 
 /**
@@ -264,7 +185,7 @@ export type Nis2Middleware = (
 ) => void | Promise<void>;
 
 /**
- * Rate limiter store interface (for custom implementations)
+ * Rate limiter store interface
  */
 export interface RateLimiterStore {
     increment(key: string): Promise<{ count: number; resetTime: number }>;
