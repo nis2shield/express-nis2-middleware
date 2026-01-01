@@ -1,11 +1,11 @@
 # Express NIS2 Middleware - Project Plan
 
-## 🎯 Obiettivo
-Creare un middleware Express.js che porti la conformità NIS2 nel mondo Node.js. L'obiettivo è fornire una soluzione **"plug-and-play"** che renda conforme un'app Express semplicemente aggiungendo `app.use(nis2Shield())`.
+## 🎯 Goal
+Create an Express.js middleware that brings NIS2 compliance to the Node.js world. The goal is to provide a **"plug-and-play"** solution that makes an Express app compliant simply by adding `app.use(nis2Shield())`.
 
-## 🏗 Architettura
+## 🏗 Architecture
 
-Il progetto sarà strutturato come un **npm package** TypeScript-first.
+The project will be structured as a TypeScript-first **npm package**.
 
 ```
 @nis2shield/express-middleware/
@@ -39,11 +39,11 @@ Il progetto sarà strutturato come un **npm package** TypeScript-first.
 └── README.md
 ```
 
-### Stack Tecnologico
+### Technology Stack
 - **Runtime**: Node.js 18+ (LTS)
 - **Language**: TypeScript 5.x
-- **Framework**: Express 4.x (+ compatibilità Express 5.x)
-- **Rate Limiting**: Custom token bucket (no dipendenze esterne)
+- **Framework**: Express 4.x (+ Express 5.x compatibility)
+- **Rate Limiting**: Custom token bucket (no external dependencies)
 - **Crypto**: Node.js native `crypto` module
 - **Validation**: Zod
 - **Testing**: Jest + Supertest
@@ -52,33 +52,33 @@ Il progetto sarà strutturato come un **npm package** TypeScript-first.
 
 ---
 
-## 🗺 Roadmap & Completamento
+## 🗺 Roadmap & Completion
 
-### Fase 1: Setup & Scaffolding ✅ COMPLETATA
-L'obiettivo è avere la struttura base del progetto pronta.
+### Phase 1: Setup & Scaffolding ✅ COMPLETED
+Goal: Have the base project structure ready.
 
 - [x] **Project Skeleton**:
-    - [x] `package.json` con metadata npm (name, version, keywords, etc.)
-    - [x] `tsconfig.json` configurato per ESM + CommonJS dual export
+    - [x] `package.json` with npm metadata (name, version, keywords, etc.)
+    - [x] `tsconfig.json` configured for ESM + CommonJS dual export
     - [x] ESLint + Prettier configuration
-    - [x] Jest setup con TypeScript
+    - [x] Jest setup with TypeScript
 - [x] **GitHub Setup**:
     - [x] Repository `nis2shield/express-nis2-middleware`
     - [x] CI workflow (test on push)
     - [x] Publish workflow (npm publish on release)
 - [x] **Basic Structure**:
-    - [x] Export pattern da `src/index.ts`
+    - [x] Export pattern from `src/index.ts`
     - [x] Types definitions in `src/types/`
 
-### Fase 2: Core Middleware - Auditing (The Truth) ✅ COMPLETATA
-Forensic logging conforme NIS2 Art. 21.
+### Phase 2: Core Middleware - Auditing (The Truth) ✅ COMPLETED
+Forensic logging compliant with NIS2 Art. 21.
 
 - [x] **AuditingMiddleware**:
     - [x] Capture request (method, path, headers, IP, User-Agent)
     - [x] Capture response (status code, duration)
     - [x] Wrap in structured JSON log
 - [x] **Log Integrity**:
-    - [x] HMAC-SHA256 signing di ogni log entry
+    - [x] HMAC-SHA256 signing of every log entry
     - [x] Configurable integrity key
 - [x] **PII Protection**:
     - [x] IP Anonymization (mask last octet)
@@ -86,11 +86,11 @@ Forensic logging conforme NIS2 Art. 21.
     - [x] Configurable fields to encrypt
 - [x] **Log Output**:
     - [x] Console (development)
-    - [ ] File (production) - *Stub implementato, fallback a console*
+    - [ ] File (production) - *Stub implemented, fallback to console*
     - [x] Custom transport (SIEM integration)
 
-### Fase 3: Active Defense ✅ COMPLETATA
-Protezione proattiva contro attacchi.
+### Phase 3: Active Defense ✅ COMPLETED
+Proactive protection against attacks.
 
 - [x] **Rate Limiting**:
     - [x] Token bucket algorithm (in-memory)
@@ -99,7 +99,7 @@ Protezione proattiva contro attacchi.
     - [x] Custom response on limit exceeded
 - [x] **IP Blocking**:
     - [x] Block list (static IPs)
-    - [x] Tor exit node detection (simulata per MVP)
+    - [x] Tor exit node detection (simulated for MVP)
     - [ ] GeoIP blocking (future v0.2.0)
 - [x] **Security Headers**:
     - [x] HSTS (Strict-Transport-Security)
@@ -109,8 +109,8 @@ Protezione proattiva contro attacchi.
     - [x] Referrer-Policy
     - [x] Permissions-Policy
 
-### Fase 4: Configuration & DX ✅ COMPLETATA
-Developer Experience di prima classe.
+### Phase 4: Configuration & DX ✅ COMPLETED
+First-class Developer Experience.
 
 - [x] **Configuration Schema**:
     - [x] Zod schema for type-safe config validation
@@ -123,8 +123,8 @@ Developer Experience di prima classe.
     - [x] Graceful degradation if config invalid
     - [x] Fail-open in rate limiter on errors
 
-### Fase 5: Publishing & Documentation ✅ COMPLETATA
-Rilascio pubblico su npm.
+### Phase 5: Publishing & Documentation ✅ COMPLETED
+Public release on npm.
 
 - [x] **npm Publishing**:
     - [x] Scope: `@nis2shield/express-middleware`
@@ -135,12 +135,12 @@ Rilascio pubblico su npm.
     - [x] Configuration examples
     - [x] Log format specification
 - [ ] **Website**:
-    - [ ] Page su nis2shield.com/express/
+    - [ ] Page on nis2shield.com/express/
     - [ ] Link in homepage
 
 ---
 
-## 💻 Esempio Utilizzo Finale
+## 💻 Final Usage Example
 
 ```typescript
 import express from 'express';
@@ -195,9 +195,9 @@ app.listen(3000);
 
 ---
 
-## 📝 Convenzioni Log (Interoperabilità)
+## 📝 Log Conventions (Interoperability)
 
-Il formato JSON è identico a Django e Spring per garantire dashboard uniformi.
+The JSON format is identical to Django and Spring to ensure uniform dashboards.
 
 ```json
 {
@@ -223,34 +223,34 @@ Il formato JSON è identico a Django e Spring per garantire dashboard uniformi.
 
 ---
 
-## 🔗 Sinergie con Altri Progetti NIS2 Shield
+## 🔗 Synergies with Other NIS2 Shield Projects
 
-| Componente | Riutilizzabile? | Note |
+| Component | Reusable? | Notes |
 |------------|-----------------|------|
-| CryptoUtils (AES-256) | ✅ Sì | Stesso algoritmo, Node.js native crypto |
-| HMAC-SHA256 | ✅ Sì | Identico |
-| Types/Interfaces | ✅ Parziale | Adattate per server-side |
+| CryptoUtils (AES-256) | ✅ Yes | Same algorithm, Node.js native crypto |
+| HMAC-SHA256 | ✅ Yes | Identical |
+| Types/Interfaces | ✅ Partial | Adapted for server-side |
 | IP Utils | ❌ No | Server-side only |
 | Rate Limiter | ❌ No | Custom implementation |
 
 ---
 
-## ⏱ Timeline Completata
+## ⏱ Timeline Completed
 
-| Fase | Tempo Stimato | Status |
+| Phase | Estimated Time | Status |
 |------|---------------|--------|
-| Fase 1: Setup | 2 giorni | ✅ Done |
-| Fase 2: Auditing | 3 giorni | ✅ Done |
-| Fase 3: Active Defense | 3 giorni | ✅ Done |
-| Fase 4: Config & DX | 2 giorni | ✅ Done |
-| Fase 5: Publishing | 1 giorno | ✅ Done |
-| **TOTALE** | **~11 giorni** | **✅ Completato** |
+| Phase 1: Setup | 2 days | ✅ Done |
+| Phase 2: Auditing | 3 days | ✅ Done |
+| Phase 3: Active Defense | 3 days | ✅ Done |
+| Phase 4: Config & DX | 2 days | ✅ Done |
+| Phase 5: Publishing | 1 day | ✅ Done |
+| **TOTAL** | **~11 days** | **✅ Completed** |
 
 ---
 
 ## 🚀 Roadmap v0.3.0 (Alignment with Django/Spring)
 
-### Fase 6: Multi-SIEM & Advanced Defense
+### Phase 6: Multi-SIEM & Advanced Defense
 - [ ] **Multi-SIEM Connectors**:
     - [ ] Splunk HEC Transport
     - [ ] Datadog Logs Transport
@@ -260,7 +260,7 @@ Il formato JSON è identico a Django e Spring per garantire dashboard uniformi.
 - [ ] **Webhooks**:
     - [ ] Wiring `WebhookNotifier` into Active Defense events
 
-### Fase 7: Compliance Engine
+### Phase 7: Compliance Engine
 - [ ] **CLI Tool**: `check-nis2` script
 - [ ] **Compliance Reports**: HTML & JSON generation
 
@@ -323,5 +323,5 @@ app.use(nis2Shield({
 
 ---
 
-*Ultimo aggiornamento: 30 Dicembre 2025*
-*Versione: v0.1.0*
+*Last Updated: December 30, 2025*
+*Version: v0.1.0*
