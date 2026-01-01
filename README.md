@@ -229,9 +229,10 @@ app.use(nis2Shield({
 
 ## Related Projects
 
-- [django-nis2-shield](https://pypi.org/project/django-nis2-shield/) - Python/Django
-- [nis2-spring-shield](https://central.sonatype.com/artifact/com.nis2shield/nis2-spring-shield) - Java/Spring Boot
-- [@nis2shield/react-guard](https://www.npmjs.com/package/@nis2shield/react-guard) - React/Frontend
+- [django-nis2-shield](https://github.com/nis2shield/django-nis2-shield): Python/Django version
+- [nis2-spring-shield](https://github.com/nis2shield/nis2-spring-shield): Java/Spring Boot version
+- [dotnet-nis2-shield](https://github.com/nis2shield/dotnet-nis2-shield): ASP.NET Core version
+- [@nis2shield/react-guard](https://github.com/nis2shield/react-guard): Frontend client-side protectiond
 
 ## Release Process
 
