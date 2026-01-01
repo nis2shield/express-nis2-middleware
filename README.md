@@ -18,12 +18,12 @@ Companies subject to NIS2 Directive need **demonstrable compliance**. This middl
 5.  **Multi-SIEM**: Direct connectors for Splunk, Datadog, QRadar
 6.  **Compliance CLI**: Audit your configuration with `npx check-nis2`
 
-> **Part of the NIS2 Shield Ecosystem**: Use with [`nis2shield/infrastructure`](https://github.com/nis2shield/infrastructure) for a complete, audited full-stack implementation.
+> **Part of the NIS2 Shield Ecosystem**: Use with [`@nis2shield/react-guard`](https://github.com/nis2shield/react-guard), [`@nis2shield/angular-guard`](https://github.com/nis2shield/angular-guard), or [`@nis2shield/vue-guard`](https://github.com/nis2shield/vue-guard) for client-side protection and [`nis2shield/infrastructure`](https://github.com/nis2shield/infrastructure) for a complete, audited full-stack implementation.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        Frontend                              │
-│  @nis2shield/react-guard                                    │
+│  @nis2shield/{react,angular,vue}-guard                      │
 │  ├── SessionWatchdog (idle detection)                       │
 │  ├── AuditBoundary (crash reports)                         │
 │  └── → POST /api/nis2/telemetry/                           │

@@ -1,6 +1,6 @@
 {
     "name": "@nis2shield/express-middleware",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "description": "NIS2 Compliance Middleware for Express.js - Forensic logging, active defense, and security headers",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
