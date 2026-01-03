@@ -158,20 +158,18 @@ export interface Nis2Config {
  * Structured audit log entry
  */
 export interface AuditLog {
-  /** ISO 8601 timestamp */
+  /** ISO 8601 UTC timestamp */
   timestamp: string;
-  /** Application name */
-  app_name: string;
   /** Log level */
-  level: 'INFO' | 'WARN' | 'ERROR';
-  /** Module identifier */
-  module: 'nis2_shield';
-  /** Log type */
-  type: 'audit_log' | 'security_event' | 'rate_limit';
+  level: 'INFO' | 'WARN' | 'ERROR' | 'SECURITY';
+  /** Component identifier */
+  component: 'NIS2-SHIELD-NODE';
+  /** Event identifier */
+  event_id: 'HTTP_ACCESS' | 'RATE_LIMIT' | 'TOR_BLOCK' | 'AUTH_FAILURE' | string;
   /** Request details */
   request: {
     method: string;
-    path: string;
+    url: string;
     ip: string;
     user_agent: string;
   };
@@ -180,8 +178,11 @@ export interface AuditLog {
     status: number;
     duration_ms: number;
   };
-  /** User identifier (encrypted if PII protection enabled) */
-  user_id?: string;
+  /** User details */
+  user?: {
+    id?: string;
+    email?: string;
+  };
   /** Additional metadata */
   metadata?: Record<string, unknown>;
   /** HMAC-SHA256 integrity hash */

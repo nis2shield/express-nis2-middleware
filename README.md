@@ -49,7 +49,7 @@ Companies subject to NIS2 Directive need **demonstrable compliance**. This middl
 
 ## ✨ Features (v0.3.0)
 
-- 🔐 **Forensic Logging**: JSON structured logs with HMAC-SHA256 integrity & PII encryption.
+- 🔐 **Forensic Logging**: Standardized `NIS2-JSON-SCHEMA v1.0` logs with HMAC-SHA256 integrity & PII encryption.
 - 🚀 **Active Defense**:
   - **Rate Limiting**: Token bucket algorithm.
   - **IP Blocking**: Block static IPs, Tor exit nodes, and Countries (GeoIP).

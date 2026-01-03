@@ -22,14 +22,17 @@ export function handleAuditing(
   // Extract user ID if available
   const userId = req.nis2?.userId || (req as any).user?.id || (req as any).user?.email;
 
+  /* 
+     NIS2 LOG SCHEMA v1.0 MAPPING
+     Strict adherence required for Auditor Kit compatibility.
+  */
   const baseLog: Omit<AuditLog, 'integrity_hash' | 'timestamp'> = {
-    app_name: process.env.npm_package_name || 'express-app',
-    module: 'nis2_shield',
-    type: 'audit_log',
     level: res.statusCode >= 500 ? 'ERROR' : res.statusCode >= 400 ? 'WARN' : 'INFO',
+    component: 'NIS2-SHIELD-NODE',
+    event_id: 'HTTP_ACCESS',
     request: {
       method: req.method,
-      path: req.originalUrl || req.url,
+      url: req.originalUrl || req.url,
       ip: clientIP,
       user_agent: req.get('user-agent') || 'unknown',
     },
@@ -37,9 +40,9 @@ export function handleAuditing(
       status: res.statusCode,
       duration_ms: duration,
     },
-    user_id: userId,
+    user: userId ? { id: userId } : undefined,
     metadata: {
-      ...(req.body && !isSensitiveBody(req) ? { body_summary: '...' } : {}),
+      ...(req.body && !isSensitiveBody(req) ? { body_summary: 'mapped_body' } : {}),
     },
   };
 
