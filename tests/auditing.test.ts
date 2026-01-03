@@ -29,9 +29,9 @@ describe('Auditing Middleware', () => {
         const logStr = logSpy.mock.calls[0][0];
         const log = JSON.parse(logStr);
 
-        expect(log.module).toBe('nis2_shield');
+        expect(log.component).toBe('NIS2-SHIELD-NODE');
         expect(log.request.method).toBe('GET');
-        expect(log.request.path).toBe('/audit-test');
+        expect(log.request.url).toBe('/audit-test');
         expect(log.response.status).toBe(200);
         expect(log.response.duration_ms).toBeGreaterThanOrEqual(0);
         expect(log.timestamp).toBeDefined();
@@ -73,8 +73,9 @@ describe('Auditing Middleware', () => {
         const log = JSON.parse(logSpy.mock.calls[0][0]);
 
         // User ID should be encrypted (contains ':') and not equal to original
-        expect(log.user_id).toContain(':');
-        expect(log.user_id).not.toBe('user-123');
+        // User ID should be encrypted (contains ':') and not equal to original
+        expect(log.user.id).toContain(':');
+        expect(log.user.id).not.toBe('user-123');
     });
 
     it('should sign logs with HMAC when integrity key is provided', async () => {
@@ -112,7 +113,7 @@ describe('Auditing Middleware', () => {
 
         expect(customHandler).toHaveBeenCalled();
         const log = customHandler.mock.calls[0][0];
-        expect(log.request.path).toBe('/custom-test');
+        expect(log.request.url).toBe('/custom-test');
 
         // Console log should NOT be called
         expect(logSpy).not.toHaveBeenCalled();

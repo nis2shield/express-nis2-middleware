@@ -30,9 +30,9 @@ export function formatLogEntry(
   if (config.encryptPII && encryptionKey) {
     const fieldsToEncrypt = config.piiFields || ['userId', 'email'];
 
-    // Encrypt user_id field specially if present
-    if (log.user_id) {
-      log.user_id = encrypt(log.user_id, encryptionKey);
+    // Encrypt user ID if present
+    if (log.user?.id) {
+      log.user.id = encrypt(log.user.id, encryptionKey);
     }
 
     // Encrypt fields in metadata

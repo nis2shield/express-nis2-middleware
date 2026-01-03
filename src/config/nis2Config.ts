@@ -88,10 +88,12 @@ export const Nis2ConfigSchema = z.object({
       filePath: z.string().optional(),
       maxFileSize: z.number().default(10 * 1024 * 1024), // Added flat fields to match usage
       maxFiles: z.number().default(5),
+      customHandler: z.any().optional(),
       fileRotation: z
         .object({
           maxFileSize: z.number().default(10 * 1024 * 1024),
           maxFiles: z.number().default(5),
+
         })
         .optional(),
     })
@@ -104,6 +106,8 @@ export const Nis2ConfigSchema = z.object({
           enabled: z.boolean().default(true),
           windowMs: z.number().default(60000),
           max: z.number().default(100),
+          keyGenerator: z.any().optional(),
+          handler: z.any().optional(),
         })
         .default({}), // defaulted
       blockTor: z.boolean().default(true),
@@ -121,8 +125,8 @@ export const Nis2ConfigSchema = z.object({
       hsts: z.boolean().default(true),
       hstsMaxAge: z.number().default(31536000),
       csp: z.string().optional(),
-      xFrameOptions: z.enum(['DENY', 'SAMEORIGIN']).optional(),
-      referrerPolicy: z.string().optional(),
+      xFrameOptions: z.enum(['DENY', 'SAMEORIGIN']).default('DENY'),
+      referrerPolicy: z.string().default('strict-origin-when-cross-origin'),
     })
     .default({}),
 
