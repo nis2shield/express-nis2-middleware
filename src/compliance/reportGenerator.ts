@@ -1,29 +1,28 @@
-
-
 export interface ComplianceReport {
-    timestamp: string;
-    score: number;
-    checks: ComplianceCheckResult[];
-    status: 'PASS' | 'FAIL' | 'WARN';
+  timestamp: string;
+  score: number;
+  checks: ComplianceCheckResult[];
+  status: 'PASS' | 'FAIL' | 'WARN';
 }
 
 export interface ComplianceCheckResult {
-    id: string;
-    description: string;
-    passed: boolean;
-    details?: string;
-    severity: 'critical' | 'warning';
+  id: string;
+  description: string;
+  passed: boolean;
+  details?: string;
+  severity: 'critical' | 'warning';
 }
 
 export class ComplianceReportGenerator {
-    static generateJSON(report: ComplianceReport): string {
-        return JSON.stringify(report, null, 2);
-    }
+  static generateJSON(report: ComplianceReport): string {
+    return JSON.stringify(report, null, 2);
+  }
 
-    static generateHTML(report: ComplianceReport): string {
-        const color = report.status === 'PASS' ? '#4ade80' : report.status === 'FAIL' ? '#f87171' : '#fbbf24';
+  static generateHTML(report: ComplianceReport): string {
+    const color =
+      report.status === 'PASS' ? '#4ade80' : report.status === 'FAIL' ? '#f87171' : '#fbbf24';
 
-        return `
+    return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,7 +53,9 @@ export class ComplianceReportGenerator {
     </div>
 
     <div class="checks">
-        ${report.checks.map(check => `
+        ${report.checks
+          .map(
+            (check) => `
         <div class="check ${check.passed ? 'pass' : 'fail'}">
             <div class="check-header">
                 <span class="check-title">${check.description}</span>
@@ -62,9 +63,11 @@ export class ComplianceReportGenerator {
             </div>
             ${check.details ? `<p style="color: #888; margin-top: 5px; font-size: 14px;">${check.details}</p>` : ''}
         </div>
-        `).join('')}
+        `
+          )
+          .join('')}
     </div>
 </body>
 </html>`;
-    }
+  }
 }
