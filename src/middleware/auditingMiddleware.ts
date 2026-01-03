@@ -85,7 +85,7 @@ function outputLog(log: AuditLog, config: LoggingConfig, fullConfig: Nis2Config)
 
   // 4. SIEM Broadcast (Always runs if enabled, regardless of primary output)
   if (fullConfig.siem && fullConfig.siem.enabled) {
-    const siemManager = new SiemTransportManager(fullConfig.siem); // In real app, singleton this
+    const siemManager = new SiemTransportManager(fullConfig.siem as any); // In real app, singleton this
     siemManager.broadcast(log);
   }
 }

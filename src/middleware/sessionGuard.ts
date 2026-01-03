@@ -45,7 +45,7 @@ export const sessionGuard = (config: SessionGuardConfig, notifier?: WebhookNotif
       console.warn(`[NIS2 SessionGuard] Hijacking detected! IP: ${ip}, UA: ${ua}`);
 
       if (notifier) {
-        notifier.notify('session_hijack', {
+        notifier.notify('session_hijack', 'Session hijacking attempt detected', {
           ip,
           user_agent: ua,
           path: req.path,

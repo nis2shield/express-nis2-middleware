@@ -32,7 +32,7 @@ export class DatadogTransport {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'DD-API-KEY': this.config.apiKey,
+          'DD-API-KEY': this.config.apiKey || '',
         },
         body: JSON.stringify(payload),
       })

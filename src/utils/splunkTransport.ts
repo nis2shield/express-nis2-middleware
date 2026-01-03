@@ -27,7 +27,7 @@ export class SplunkTransport {
       time: new Date(entry.timestamp).getTime() / 1000,
       host: entry.metadata?.hostname || 'express-middleware',
       source: this.config.source || 'nis2-shield',
-      sourcetype: this.config.sourcetype || '_json',
+      sourcetype: this.config.sourceType || '_json',
       index: this.config.index || 'main',
       event: entry,
     };
@@ -53,10 +53,10 @@ export class SplunkTransport {
       // HEC expects newline-delimited JSON for batch
       const body = batch.map((e) => JSON.stringify(e)).join('\n');
 
-      const response = await fetch(`${this.config.url}/services/collector`, {
+      const response = await fetch(`${this.config.hecUrl || ''}/services/collector`, {
         method: 'POST',
         headers: {
-          Authorization: `Splunk ${this.config.token}`,
+          Authorization: `Splunk ${this.config.token || ''}`,
         },
         body,
       });

@@ -45,12 +45,12 @@ export function handleSessionGuard(
   let violation = false;
   let reason = '';
 
-  if (config.validateIP && session.nis2Fingerprint.ip !== currentIP) {
+  if (config.enforceIpBinding && session.nis2Fingerprint.ip !== currentIP) {
     violation = true;
     reason = `IP address mismatch: stored=${session.nis2Fingerprint.ip}, current=${currentIP}`;
   }
 
-  if (config.validateUserAgent && session.nis2Fingerprint.userAgent !== currentUserAgent) {
+  if (config.enforceUaBinding && session.nis2Fingerprint.userAgent !== currentUserAgent) {
     violation = true;
     reason = `User-Agent mismatch: stored=${session.nis2Fingerprint.userAgent}, current=${currentUserAgent}`;
   }

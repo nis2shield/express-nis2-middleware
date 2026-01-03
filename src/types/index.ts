@@ -31,6 +31,35 @@ export interface LoggingConfig {
   maxFiles?: number;
   /** Custom log handler (when output is 'custom') */
   customHandler?: (log: AuditLog) => void;
+  /** Splunk Configuration */
+  splunk?: {
+    enabled: boolean;
+    source: string;
+    sourceType: string;
+    hecUrl?: string;
+    token?: string;
+    index?: string;
+    batchSize?: number;
+    batchInterval?: number;
+  };
+  /** Datadog Configuration */
+  datadog?: {
+    enabled: boolean;
+    apiKey?: string;
+    site: string;
+    service: string;
+    tags?: string[];
+    ddtags?: string; // Legacy support
+    ddsource?: string; // Legacy support
+  };
+  /** QRadar Configuration */
+  qradar?: {
+    enabled: boolean;
+    host: string;
+    port: number;
+    protocol: 'tcp' | 'udp';
+    transformToCEF?: boolean;
+  };
 }
 
 /**
