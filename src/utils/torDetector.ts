@@ -115,7 +115,9 @@ export class TorDetector {
       cache.exitNodes = new Set(ips);
       cache.lastUpdated = Date.now();
 
-      console.log(`[NIS2 Shield] Loaded ${cache.exitNodes.size} Tor exit nodes`);
+      if (process.env.NODE_ENV !== 'test') {
+        console.log(`[NIS2 Shield] Loaded ${cache.exitNodes.size} Tor exit nodes`);
+      }
     } catch (error) {
       console.error('[NIS2 Shield] Failed to fetch Tor exit nodes:', error);
       // Keep using old cache if available, or empty set
