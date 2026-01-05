@@ -93,7 +93,6 @@ export const Nis2ConfigSchema = z.object({
         .object({
           maxFileSize: z.number().default(10 * 1024 * 1024),
           maxFiles: z.number().default(5),
-
         })
         .optional(),
     })

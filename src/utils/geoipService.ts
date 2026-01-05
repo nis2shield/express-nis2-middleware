@@ -4,6 +4,8 @@
  * @module @nis2shield/express-middleware
  */
 
+/* eslint-disable no-console */
+
 // Note: maxmind package is an optional peer dependency
 // Users must install separately: npm install maxmind
 

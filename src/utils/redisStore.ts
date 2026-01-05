@@ -4,6 +4,8 @@
  * @module @nis2shield/express-middleware
  */
 
+/* eslint-disable no-console */
+
 import { RateLimiterStore } from '../types';
 
 export interface RedisStoreOptions {

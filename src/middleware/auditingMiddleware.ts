@@ -62,8 +62,10 @@ function outputLog(log: AuditLog, config: LoggingConfig, fullConfig: Nis2Config)
   // 1. Console Output
   if (config.output === 'console') {
     if (log.level === 'ERROR') {
+      /* eslint-disable-next-line no-console */
       console.error(output);
     } else {
+      /* eslint-disable-next-line no-console */
       console.log(output);
     }
   }

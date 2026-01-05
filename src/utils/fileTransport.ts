@@ -4,6 +4,7 @@
  * @module @nis2shield/express-middleware
  */
 
+/* eslint-disable no-console */
 import { appendFile, stat, rename, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { dirname } from 'path';

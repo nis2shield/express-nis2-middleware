@@ -165,7 +165,7 @@ export interface AuditLog {
   /** Component identifier */
   component: 'NIS2-SHIELD-NODE';
   /** Event identifier */
-  event_id: 'HTTP_ACCESS' | 'RATE_LIMIT' | 'TOR_BLOCK' | 'AUTH_FAILURE' | string;
+  event_id: string;
   /** Request details */
   request: {
     method: string;

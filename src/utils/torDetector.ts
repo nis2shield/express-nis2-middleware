@@ -4,6 +4,8 @@
  * @module @nis2shield/express-middleware
  */
 
+/* eslint-disable no-console */
+
 const TOR_EXIT_LIST_URL = 'https://check.torproject.org/torbulkexitlist';
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
